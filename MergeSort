@@ -1,0 +1,131 @@
+import edu.princeton.cs.algs4.In;
+
+/**
+ * @author Edmond
+ */
+public class MergeSort {
+    private static boolean less(Comparable v,Comparable w){
+        return v.compareTo(w)<0;
+    }
+    private static void exch(Comparable[] a,int i,int j){
+        Comparable t=a[i];
+        a[i]=a[j];
+        a[j]=t;
+    }
+    private static void show(Comparable[] a){
+        for(int i=0;i<a.length;i++){
+            System.out.print(a[i]+" ");
+        }
+    }
+    public static boolean isSorted(Comparable[] a){
+        for(int i=0;i<a.length;i++){
+            if(less(a[i],a[i-1])){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     *
+     * @param a 需要排序的数组/等
+     * @param lo 左边界
+     * @param mid 中间值
+     * @param hi 有边界
+     */
+
+    /**
+     *
+     * core thought
+     * spare to exchange time
+     *
+     *
+     */
+
+    // additional array
+
+    private static Comparable[] aux;
+
+    /**
+     *
+     * @param a
+     * @param lo
+     * @param mid
+     * @param hi
+     * 归并数组
+     */
+    public static void merge(Comparable[] a,int lo,int mid,int hi){
+        /** function 原地归并
+         * 对a进行一次重组
+         * lo-mid is smaller than elems between mid to hi
+         * using additional array to simplize processdure
+         * lo-mid mid+1-hi 分别是两个有序的数组 只是采用一个数组内的方式
+         * 边缘解析，对于两个只有一个元素的数组，就相当于完成了一次排序合并
+         * 将一个N的数组，逐层分解到各个小单位，通过回溯就完成整个的排序
+         */
+        int p1=lo,p2=mid+1;
+        for(int i=lo;i<=hi;i++){
+            aux[i]=a[i];
+        }
+        /**
+         * improvement:
+         * 结果向分析，我们添加的元素为k个
+         * 从原来的while条件判断到置顶个数
+         * 利用及时某一个数组元素全部添加完毕
+         * 该条件下的特征值进行元素的继续添加
+         */
+        for(int k=lo;k<=hi;k++){
+            if(p1>mid){
+                a[k]=aux[p2++];
+            }else if(p2>hi){
+                a[k]=aux[p1++];
+            }else if(less(aux[p1],aux[p2])){
+                a[k]=aux[p1++];
+            }else{
+                a[k]=aux[p2++];
+            }
+        }
+    }
+    public static void sort(Comparable[] a){
+        aux=new Comparable[a.length];
+        sort(a,0,a.length-1);
+    }
+    private static void sort(Comparable[] a,int lo,int hi){
+        /**
+         * 自顶向下
+         */
+        if(hi<=lo) {
+            return;
+        }
+        int mid=lo+(hi-lo)/2;
+        sort(a,lo,mid);
+        sort(a,mid+1,hi);
+        merge(a,lo,mid,hi);
+    }
+    public static void bottomSort(Comparable[] a){
+        /**
+         * 自顶向上
+         */
+        aux=new Comparable[a.length];
+        /**
+         * size understand
+         * 从设计 原地合并的时候，兼顾偶数和奇数长度，归并的两个数组长度可不等，或不等为必然情况
+         * size 1 2 4 8 16
+         * 在第二重循环，对相同size进行排序，会存在最后几个数字没进行排序的情况
+         * 这个情况通过一重循环和merge的抽象性完成
+         */
+        for(int size=1;size<a.length-1;size+=size){
+            for(int i=0;i<a.length-size;i+=size+size){
+                merge(a,i,i+size-1,Math.min(a.length-1,i+size+size-1));
+            }
+        }
+    }
+    public static void main(String[] args) {
+        String[] a= In.readStrings("tiny.txt");
+        show(a);
+        System.out.println("");
+        bottomSort(a);
+        assert isSorted(a);
+        show(a);
+    }
+}
